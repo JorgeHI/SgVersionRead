@@ -1,0 +1,21 @@
+set cut_paste_input [stack 0]
+version 16.0 v1
+Read {
+ inputs 0
+ origset true
+ name SGVersionRead
+ selected true
+ xpos 3
+ ypos -73
+ addUserKnob {20 sgversionread l SGVersionRead}
+ addUserKnob {4 project M {""}}
+ addUserKnob {4 sequence_1 l seq -STARTLINE M {""}}
+ addUserKnob {4 shot -STARTLINE M {""}}
+ addUserKnob {4 task M {""}}
+ addUserKnob {4 pulldown l status -STARTLINE M {any rev aprv}}
+ addUserKnob {22 version_load l load +STARTLINE}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {1 version_name l name t "The name of the loaded Version"}
+ addUserKnob {3 version_id l id t "Sg version id" -STARTLINE}
+ addUserKnob {22 version_open_browser l "Open in Browser" +STARTLINE}
+}
