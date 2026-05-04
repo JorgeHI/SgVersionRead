@@ -1,21 +1,42 @@
-set cut_paste_input [stack 0]
-version 16.0 v1
 Read {
  inputs 0
- origset true
  name SGVersionRead
- selected true
- xpos 3
- ypos -73
- addUserKnob {20 sgversionread l SGVersionRead}
- addUserKnob {4 project M {""}}
- addUserKnob {4 sequence_1 l seq -STARTLINE M {""}}
- addUserKnob {4 shot -STARTLINE M {""}}
- addUserKnob {4 task M {""}}
- addUserKnob {4 pulldown l status -STARTLINE M {any rev aprv}}
- addUserKnob {22 version_load l load +STARTLINE}
- addUserKnob {26 "" +STARTLINE}
- addUserKnob {1 version_name l name t "The name of the loaded Version"}
- addUserKnob {3 version_id l id t "Sg version id" -STARTLINE}
- addUserKnob {22 version_open_browser l "Open in Browser" +STARTLINE}
+ knobChanged "import SGVersionRead.node_handler as _h\n_h.knob_changed(nuke.thisNode(), nuke.thisKnob())"
+ onCreate "import SGVersionRead.node_handler as _h\n_h.on_create(nuke.thisNode())"
+ label {[value version_name]}
+ tile_color 0
+ addUserKnob {20 sgvr_tab l "SG Version Read"}
+ addUserKnob {4 sg_project l Project M {"-- loading --"}}
+ addUserKnob {4 sg_sequence l Sequence M {"-- select project --"}}
+ addUserKnob {4 sg_shot l Shot M {"-- select sequence --"}}
+ addUserKnob {4 task l Task M {"-- select shot --"}}
+ addUserKnob {26 _sep0 l "" +STARTLINE}
+ addUserKnob {4 status_filter l Status M {"any"}}
+ addUserKnob {22 refresh_status_btn l "  ↻  " T "import SGVersionRead.node_handler as _h; _h.populate_status_filter(nuke.thisNode())" -STARTLINE}
+ addUserKnob {26 _sep1 l "" +STARTLINE}
+ addUserKnob {22 refresh_btn l Refresh T "import SGVersionRead.node_handler as _h; _h.refresh_all(nuke.thisNode())"}
+ addUserKnob {22 load_btn l "Load Latest" T "import SGVersionRead.node_handler as _h; _h.load_selected_version(nuke.thisNode())" -STARTLINE}
+ addUserKnob {26 _sep2 l "" +STARTLINE}
+ addUserKnob {6 enable_auto_check l "Auto Version Check" +STARTLINE}
+ enable_auto_check false
+ addUserKnob {3 check_interval l "Check Interval (sec)" -STARTLINE}
+ check_interval 300
+ addUserKnob {20 version_tab l Version}
+ addUserKnob {1 version_name l Version +READONLY}
+ version_name ""
+ addUserKnob {1 version_status l Status +READONLY}
+ version_status ""
+ addUserKnob {3 version_id l "Version ID" +READONLY}
+ version_id 0
+ addUserKnob {22 open_browser_btn l "Open in Browser" T "import SGVersionRead.node_handler as _h; _h.open_in_browser(nuke.thisNode())" +STARTLINE}
+ addUserKnob {3 loaded_task_id l "Task ID" +INVISIBLE +READONLY}
+ loaded_task_id 0
+ addUserKnob {3 loaded_project_id l "Project ID" +INVISIBLE +READONLY}
+ loaded_project_id 0
+ addUserKnob {3 loaded_sequence_id l "Sequence ID" +INVISIBLE +READONLY}
+ loaded_sequence_id 0
+ addUserKnob {3 loaded_shot_id l "Shot ID" +INVISIBLE +READONLY}
+ loaded_shot_id 0
+ addUserKnob {1 node_version l "Node Version" +INVISIBLE}
+ node_version "0.1.0"
 }

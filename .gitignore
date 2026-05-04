@@ -1,3 +1,6 @@
+# Local pip deps (install with: scripts/install_deps.sh)
+.deps/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
