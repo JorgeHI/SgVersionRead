@@ -41,24 +41,69 @@ def _parse_task_id(label):
 
 # ── node creation ─────────────────────────────────────────────────────────────
 
-def _find_nk():
-    for p in nuke.pluginPath():
-        candidate = os.path.join(p, "SGVersionRead.nk")
-        if os.path.isfile(candidate):
-            return candidate
-    return None
+# Knob definition stamped onto a fresh Read node via Node.readKnobs().
+# Raw string preserves literal \n required by Nuke's knob-script syntax.
+_KNOBS_SCRIPT = r'''knobChanged "import SGVersionRead.node_handler as _h\n_h.knob_changed(nuke.thisNode(), nuke.thisKnob())"
+onCreate "import SGVersionRead.node_handler as _h\n_h.on_create(nuke.thisNode())"
+label {[value version_name]}
+tile_color 0
+addUserKnob {20 sgvr_tab l "SG Version Read"}
+addUserKnob {4 sg_project l Project M {"-- loading --"}}
+addUserKnob {4 sg_sequence l Sequence M {"-- select project --"}}
+addUserKnob {4 sg_shot l Shot M {"-- select sequence --"}}
+addUserKnob {4 task l Task M {"-- select shot --"}}
+addUserKnob {26 _sep0 l "" +STARTLINE}
+addUserKnob {4 status_filter l Status M {"any"}}
+addUserKnob {22 refresh_status_btn l "  ↻  " T "import SGVersionRead.node_handler as _h; _h.populate_status_filter(nuke.thisNode())" -STARTLINE}
+addUserKnob {26 _sep1 l "" +STARTLINE}
+addUserKnob {22 refresh_btn l Refresh T "import SGVersionRead.node_handler as _h; _h.refresh_all(nuke.thisNode())"}
+addUserKnob {22 load_btn l "Load Latest" T "import SGVersionRead.node_handler as _h; _h.load_selected_version(nuke.thisNode())" -STARTLINE}
+addUserKnob {26 _sep2 l "" +STARTLINE}
+addUserKnob {6 enable_auto_check l "Auto Version Check" +STARTLINE}
+enable_auto_check false
+addUserKnob {3 check_interval l "Check Interval (sec)" -STARTLINE}
+check_interval 300
+addUserKnob {20 version_tab l Version}
+addUserKnob {1 version_name l Version +READONLY}
+version_name ""
+addUserKnob {1 version_status l Status +READONLY}
+version_status ""
+addUserKnob {3 version_id l "Version ID" +READONLY}
+version_id 0
+addUserKnob {22 open_browser_btn l "Open in Browser" T "import SGVersionRead.node_handler as _h; _h.open_in_browser(nuke.thisNode())" +STARTLINE}
+addUserKnob {3 loaded_task_id l "Task ID" +INVISIBLE +READONLY}
+loaded_task_id 0
+addUserKnob {3 loaded_project_id l "Project ID" +INVISIBLE +READONLY}
+loaded_project_id 0
+addUserKnob {3 loaded_sequence_id l "Sequence ID" +INVISIBLE +READONLY}
+loaded_sequence_id 0
+addUserKnob {3 loaded_shot_id l "Shot ID" +INVISIBLE +READONLY}
+loaded_shot_id 0
+addUserKnob {1 node_version l "Node Version" +INVISIBLE}
+node_version "0.1.0"
+'''
 
 
 def create_node():
-    """Paste SGVersionRead.nk and return the new node. Must run on main thread."""
-    path = _find_nk()
-    if not path:
-        logger.warning("SGVersionRead.nk not found in nuke.pluginPath()")
+    """Build SGVersionRead from a fresh Read + stamped user knobs.
+
+    Avoids nuke.nodePaste which collides with Nuke's drop-event state
+    ("RuntimeError: Viewer1") and removes the need for an external .nk file.
+    """
+    n = nuke.createNode("Read", inpanel=False)
+    if n is None:
         return None
-    before = set(nuke.allNodes())
-    nuke.nodePaste(path)
-    new_nodes = list(set(nuke.allNodes()) - before)
-    return new_nodes[0] if new_nodes else None
+    try:
+        n.setName("SGVersionRead", uncollide=True)
+    except Exception:
+        pass
+    n.readKnobs(_KNOBS_SCRIPT)
+    # readKnobs only stores the onCreate string for future loads — fire it now.
+    try:
+        on_create(n)
+    except Exception as e:
+        logger.warning(str(e))
+    return n
 
 
 # ── public API ────────────────────────────────────────────────────────────────

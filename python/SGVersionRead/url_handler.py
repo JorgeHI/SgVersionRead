@@ -1,5 +1,6 @@
 import re
-import nuke
+import traceback
+
 from .constants import SG_VERSION_URL_PATTERNS
 from .logger import getLogger
 
@@ -14,16 +15,11 @@ def _extract_version_id(text):
     return None
 
 
-def handle_drop(mime_type, data):
-    """
-    Nuke drop-data callback.  Register once with nuke.addDropDataCallback().
-    Returns True if the drop was handled, None otherwise.
-    """
-    if mime_type not in ("text/plain", "text/uri-list"):
-        return None
-
-    text = data.strip() if isinstance(data, str) else data.decode("utf-8", errors="ignore").strip()
-    version_id = _extract_version_id(text)
+def handle_drop(mime_type, text):
+    """nukescripts drop-data callback. Return True if SG Version URL handled."""
+    if isinstance(text, bytes):
+        text = text.decode("utf-8", errors="ignore")
+    version_id = _extract_version_id(text.strip())
     if version_id is None:
         return None
 
@@ -33,6 +29,6 @@ def handle_drop(mime_type, data):
         if node:
             load_version_from_id(node, version_id)
         return True
-    except Exception as e:
-        logger.warning(str(e))
+    except Exception:
+        logger.warning("drop handler failed:\n%s", traceback.format_exc())
         return None

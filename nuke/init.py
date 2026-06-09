@@ -15,13 +15,6 @@ if os.path.isdir(_deps) and _deps not in sys.path:
 nuke.pluginAddPath(os.path.join(_root, "python"))
 nuke.pluginAddPath(os.path.join(_root, "gizmo"))
 
-# ── URL drop handler ──────────────────────────────────────────────────────────
-try:
-    from SGVersionRead.url_handler import handle_drop
-    nuke.addDropDataCallback(handle_drop)
-except Exception as _e:
-    nuke.warning(f"SGVersionRead: could not register URL drop handler: {_e}")
-
 # ── global version checker thread (one thread for all nodes) ──────────────────
 try:
     from SGVersionRead.version_checker import start

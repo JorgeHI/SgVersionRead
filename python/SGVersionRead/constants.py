@@ -1,6 +1,6 @@
 import logging
 
-dev_mode = False
+dev_mode = True
 logging_level = logging.DEBUG if dev_mode else logging.WARNING
 
 # ShotGrid credential env var names
